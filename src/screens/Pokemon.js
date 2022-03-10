@@ -1,0 +1,64 @@
+import { ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import Header from "../components/Pokemon/Header";
+import Type from "../components/Pokemon/Type";
+import Stats from "../components/Pokemon/Stats";
+import Icon from "react-native-vector-icons/FontAwesome5";
+import { getPokemonDetailsApi } from "../api/pokemon";
+import Favorite from "../components/Pokemon/Favorite";
+import useAuth from "../hooks/useAuth";
+
+export default function Pokemon(props) {
+  const {
+    route: { params },
+    navigation,
+  } = props;
+
+  const [pokemon, setPokemon] = useState(null);
+  const { auth } = useAuth();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => auth && <Favorite id={pokemon?.id} />,
+      headerLeft: () => (
+        <Icon
+          name="arrow-left"
+          color="#fff"
+          size={20}
+          style={{
+            margin: 10,
+            padding: 25,
+            paddingLeft: 5,
+          }}
+          onPress={navigation.goBack}
+        />
+      ),
+    });
+  }, [navigation, params, pokemon]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await getPokemonDetailsApi(params.id);
+        setPokemon(response);
+      } catch (err) {
+        navigation.goBack();
+      }
+    })();
+  }, [params]);
+
+  if (!pokemon) return null;
+
+  return (
+    <ScrollView>
+      <Header
+        name={pokemon.name}
+        order={pokemon.order}
+        image={pokemon.sprites.other["official-artwork"].front_default}
+        type={pokemon.types[0].type.name}
+      />
+      <Type types={pokemon.types} />
+      <Stats stats={pokemon.stats} />
+    </ScrollView>
+  );
+}

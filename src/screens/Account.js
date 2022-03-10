@@ -1,0 +1,11 @@
+import { View, Text, SafeAreaView } from "react-native";
+import LoginForm from "../components/auth/LoginForm";
+import UserData from "../components/auth/UserData";
+import useAuth from "../hooks/useAuth";
+import React from "react";
+
+export default function Account() {
+  const { auth } = useAuth();
+
+  return <View>{auth ? <UserData /> : <LoginForm />}</View>;
+}
